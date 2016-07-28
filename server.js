@@ -11,7 +11,7 @@ io.on('connection',function (socket){
 		character[socket.id] = data.playerPos;
 		io.emit("inroom_res",{character:character});
 		},10)
-		console.log("res");
+		console.log("New Player!!" + socket.id);
 	});
 
 	socket.on("characterPosUpdate",function(data,id){

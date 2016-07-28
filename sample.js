@@ -1,6 +1,7 @@
 window.onload = function() {
 		var canvasWidth = 600, canvasHeight = 400;// canvasのサイズを指定
 		var scene = new THREE.Scene();
+		
 		// シーンの作成
 		var arrows = {
 			righ:false,
@@ -92,6 +93,10 @@ class Player extends Character {
 
 			ioSocket.on("update",function(data){
 						if(Object.keys(data.character).length !== Object.keys(anotherPlayer).length){
+							scene = new THREE.Scene();
+							camera.position.set(30, 40, 80);
+							light.position.set(0, 100, 30);
+							scene.add(light);
 							for (key in data.character){
 									anotherPlayer[key] = new Character(data.id);
 							}
