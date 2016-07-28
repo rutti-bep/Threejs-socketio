@@ -50,39 +50,44 @@ window.onload = function() {
 			if(arrows.down){ player.pos.z += 1;}
 			if(arrows.left){ player.pos.x -= 1;}
 			if(arrows.right){ player.pos.x += 1;}
-			if(player.pos.y > 0){
+			if(player.jump.flag){
+				if(player.pos.y === 0){
+					Jump();
+				}
+				if(player.pos.y > 0){
 					player.jump.speed += 0.1;
 					player.pos.y -= player.jump.speed*player.jump.speed;
-			}else{
+				}else{
 					player.jump.flag = false;
 					player.pos.y = 0;		
+					ioSocket.emit("playerPosUpdate",{playerPos:player.pos});
+				}
 			}
-			if(arrows.up || arrows.down || arrows.left || arrows.right){
-					ioSocket.emit("playerPosUpdate",{player:player});
+			if(arrows.up || arrows.down || arrows.left || arrows.right || player.jump.flag){
+					ioSocket.emit("playerPosUpdate",{playerPos:player.pos});
 			}
 			boxMesh.position.set(player.pos.x,player.pos.y,player.pos.z);
 		}
 
 		function Jump(){
+			//ioSocket.emit("playerJump",{flag:true})
 			player.pos.y += 50;
 			player.jump.speed = 0;
 			boxMesh.position.set(player.pos.x,player.pos.y,player.pos.z);
 		}
 
 		function connect(){
-					ioSocket.emit("update",{value:"update"});
+					ioSocket.emit("update");
 
 					ioSocket.on("update_res",function(data){
-							player = data.player;
+							player.pos = data.player.pos;
 					});
 		}
 
 		document.body.addEventListener('keydown',function (event){
 			switch(event.keyCode){
 				case 32 :
-				if(player.pos.y <= 0){
-					Jump();
-				}
+				player.jump.flag = true;
 				break
 				case 38 : //UP
 				arrows.up = true;

@@ -9,17 +9,19 @@ var player = {
 
 io.on('connection',function (socket){
 	
-	socket.on("update",function(data){
+	socket.on("update",function(){
 					io.emit("update_res",{player:player});
 	})
 	
 	socket.on("playerPosUpdate",function(data){
-					//player.pos.x = data.player.pos.x;		
-					//player.pos.y = data.player.pos.y;		
-					//player.pos.z = data.player.pos.z; 
-					player = data.player;
+					player.pos = data.playerPos;		
+					//player = data.player;
 	})
-	
+/*
+	socket.on("playerJump",function(data){
+					player.jump.flag = true;
+	})
+	*/
 	socket.on("disconnect",function(){
 					io.emit("send",{value:"disconnect"});
 	})
