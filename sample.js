@@ -8,20 +8,7 @@ window.onload = function() {
 			up:false,
 			down:false
 		};
-	
-		var player = {
-				pos:{x:0,y:0,z:0},
-				size:{x:10,y:10,z:10},
-				jump:{flag:false,speed:0}
-		};
 
-		// 箱の作成
-		var boxGeometry = new THREE.BoxGeometry(player.size.x, player.size.y, player.size.z);
-		var boxMaterial = new THREE.MeshLambertMaterial({ color: '#E74C3C'});
-		boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
-		boxMesh.position.set(player.pos.x,player.pos.y,player.pos.z);
-		scene.add(boxMesh);
-		console.dir(boxMesh);
 		// カメラの作成
 		var camera = new THREE.PerspectiveCamera(75, canvasWidth / canvasHeight, 1, 1000);
 		camera.position.set(30, 40, 80);
@@ -37,57 +24,86 @@ window.onload = function() {
 		document.body.appendChild(renderer.domElement);
 		renderer.render(scene, camera);
 
+
 		 var ioSocket = io.connect( "http://localhost:3000" );
+	
 
 		setInterval(function(){
-				playerupdate();
+				player.move();
 				renderer.render(scene, camera);
-				connect();
+				for (key in anotherPlayer){
+						anotherPlayer[key].Update();
+				}
 		},1000/30)
 		
-		function playerupdate(){
-			if(arrows.up) { player.pos.z -= 1;}	
-			if(arrows.down){ player.pos.z += 1;}
-			if(arrows.left){ player.pos.x -= 1;}
-			if(arrows.right){ player.pos.x += 1;}
-			if(player.jump.flag){
-				if(player.pos.y === 0){
-					Jump();
-				}
-				if(player.pos.y > 0){
-					player.jump.speed += 0.1;
-					player.pos.y -= player.jump.speed*player.jump.speed;
+class Character {
+		constructor(name)	{
+				this.name = name;
+				this.pos = {x:0,y:0,z:0};
+				this.size = {x:10,y:10,z:10};
+				this.jumpFlag = false;
+				this.jumpSpeed = 0;
+				this.color = "#ffffff"
+				this.boxGeometry = new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z);
+				this.boxMaterial = new THREE.MeshLambertMaterial({ color: this.color});
+				this.boxMesh = new THREE.Mesh(this.boxGeometry, this.boxMaterial);
+				scene.add(this.boxMesh);
+		}
+		
+		Update(){
+			this.boxMesh.position.set(this.pos.x,this.pos.y,this.pos.z);
+		}
+}
+
+class Player extends Character {
+
+		move(){
+			if(arrows.up) { this.pos.z -= 1;}	
+			if(arrows.down){ this.pos.z += 1;}
+			if(arrows.left){ this.pos.x -= 1;}
+			if(arrows.right){ this.pos.x += 1;}
+			if(this.jumpFlag){
+				if(this.pos.y === 0){
+					this.pos.y += 50;
+					this.jumpSpeed = 0;
+				if(this.pos.y > 0){
+					this.jumpSpeed += 0.1;
+					this.pos.y -= this.jumpSpeed*this.jumpSpeed;
 				}else{
-					player.jump.flag = false;
-					player.pos.y = 0;		
-					ioSocket.emit("playerPosUpdate",{playerPos:player.pos});
+					this.jumpFlag = false;
+					this.pos.y = 0;		
+					ioSocket.emit("characterPosUpdate",{playerPos:this.pos});
 				}
 			}
-			if(arrows.up || arrows.down || arrows.left || arrows.right || player.jump.flag){
-					ioSocket.emit("playerPosUpdate",{playerPos:player.pos});
+			if(arrows.up || arrows.down || arrows.left || arrows.right || this.jumpFlag){
+					ioSocket.emit("characterPosUpdate",{playerPos:this.pos});
 			}
-			boxMesh.position.set(player.pos.x,player.pos.y,player.pos.z);
 		}
 
-		function Jump(){
-			//ioSocket.emit("playerJump",{flag:true})
-			player.pos.y += 50;
-			player.jump.speed = 0;
-			boxMesh.position.set(player.pos.x,player.pos.y,player.pos.z);
-		}
+}
+			var player = new Player("player");
+			var anotherPlayer = {};	
+			
+		 	ioSocket.on("inroom_res",function(data){
+						console.log(anotherPlayer);
+			});	
+			ioSocket.emit("inroom",{playerPos:player.pos});
 
-		function connect(){
-					ioSocket.emit("update");
-
-					ioSocket.on("update_res",function(data){
-							player.pos = data.player.pos;
-					});
-		}
+			ioSocket.on("update",function(data){
+						if(Object.keys(data.character).length !== Object.keys(anotherPlayer).length){
+							for (key in data.character){
+									anotherPlayer[key] = new Character(data.id);
+							}
+						}
+							for (key in data.character){
+									anotherPlayer[key].pos = data.character[key];
+							}
+			});	
 
 		document.body.addEventListener('keydown',function (event){
 			switch(event.keyCode){
 				case 32 :
-				player.jump.flag = true;
+				player.jumpFlag = true;
 				break
 				case 38 : //UP
 				arrows.up = true;
