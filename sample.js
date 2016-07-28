@@ -37,9 +37,12 @@ window.onload = function() {
 		document.body.appendChild(renderer.domElement);
 		renderer.render(scene, camera);
 
+		 var ioSocket = io.connect( "http://localhost:3000" );
+
 		setInterval(function(){
 				playerupdate();
 				renderer.render(scene, camera);
+				connect();
 		},1000/30)
 		
 		function playerupdate(){
@@ -54,6 +57,9 @@ window.onload = function() {
 					player.jump.flag = false;
 					player.pos.y = 0;		
 			}
+			if(arrows.up || arrows.down || arrows.left || arrows.right){
+					ioSocket.emit("playerPosUpdate",{player:player});
+			}
 			boxMesh.position.set(player.pos.x,player.pos.y,player.pos.z);
 		}
 
@@ -63,8 +69,15 @@ window.onload = function() {
 			boxMesh.position.set(player.pos.x,player.pos.y,player.pos.z);
 		}
 
+		function connect(){
+					ioSocket.emit("update",{value:"update"});
+
+					ioSocket.on("update_res",function(data){
+							player = data.player;
+					});
+		}
+
 		document.body.addEventListener('keydown',function (event){
-			console.log(event.keyCode);
 			switch(event.keyCode){
 				case 32 :
 				if(player.pos.y <= 0){
