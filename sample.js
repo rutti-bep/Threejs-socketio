@@ -8,7 +8,7 @@ window.onload = function() {
 			up:false,
 			down:false
 		};
-
+	
 		var player = {
 				pos:{x:0,y:0,z:0},
 				size:{x:10,y:10,z:10},

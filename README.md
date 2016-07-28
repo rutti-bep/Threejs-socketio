@@ -1,3 +1,6 @@
+#cloneしたら
+- npm socket.io と socket.ioのクライアントとthree.jsのデータを入れるべし
+
 # Three.jsのテスト
 - space でジャンプ
 - 矢印キー で移動
