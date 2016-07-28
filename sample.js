@@ -66,6 +66,7 @@ class Player extends Character {
 				if(this.pos.y === 0){
 					this.pos.y += 50;
 					this.jumpSpeed = 0;
+				}
 				if(this.pos.y > 0){
 					this.jumpSpeed += 0.1;
 					this.pos.y -= this.jumpSpeed*this.jumpSpeed;
