@@ -97,6 +97,7 @@ class Player extends Character {
 							camera.position.set(30, 40, 80);
 							light.position.set(0, 100, 30);
 							scene.add(light);
+							anotherPlayer = {}; 
 							for (key in data.character){
 									anotherPlayer[key] = new Character(data.id);
 							}

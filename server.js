@@ -8,8 +8,8 @@ io.on('connection',function (socket){
 	
 	socket.on("inroom",function(data){
 		setTimeout(function(){
-		character[socket.id] = data.playerPos;
-		io.emit("inroom_res",{character:character});
+			character[socket.id] = data.playerPos;
+			io.emit("inroom_res",{character:character});
 		},10)
 		console.log("New Player!!" + socket.id);
 	});
@@ -19,7 +19,9 @@ io.on('connection',function (socket){
 	})
 	
 	socket.on("disconnect",function(){
-		delete character[socket.io];			
+		delete character[socket.id];			
+		io.emit("inroom_res",{character:character});
+		console.log("Delete Player!!" + socket.id);
 	})
 })
 
